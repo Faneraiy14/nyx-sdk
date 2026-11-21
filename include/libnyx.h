@@ -334,6 +334,11 @@ static inline unsigned nyx_win_seq(void) { return (unsigned) nyx_syscall3(NYX_SC
 #define NYX_TRACE_ME   3
 typedef struct { nyx_u32 seq; unsigned short pid, num; nyx_u32 a1, a2, a3; int ret; char str[24]; } nyx_trace_rec_t;
 static inline int nyx_trace(int op, void* buf, int cap) { return nyx_syscall3(NYX_SC(59), (nyx_u32) op, (nyx_u32) buf, (nyx_u32) cap); }
+/* 0.1.0.24 W4: сповіщення. nyx_notify - короткий рядок (до 95 байт) - стіл покаже карткою; nyx_notify_get - перше з
+ * номером > after у buf, повертає його номер (0 - нових нема). Ядро саме сповіщає: флешка, час з мережі, аварія програми. */
+#define NYX_HAS_NOTIFY 1
+static inline int nyx_notify(const char* text) { return nyx_syscall3(NYX_SC(60), (nyx_u32) text, 0, 0); }
+static inline unsigned nyx_notify_get(unsigned after, char* buf, int cap) { return (unsigned) nyx_syscall3(NYX_SC(61), (nyx_u32) after, (nyx_u32) buf, (nyx_u32) cap); }
 
 /* Змінити розмір свого вікна (0.1.0.6; на подію NYX_WEV_RESIZE). Вміст після цього - чистий, перемалюй. */
 static inline int nyx_win_resize(int id, int w, int h) {
