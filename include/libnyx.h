@@ -322,6 +322,18 @@ static inline int nyx_win_create(int w, int h, const char* title) {
 #define NYX_HAS_CLIPBOARD 1
 static inline int nyx_clip_set(const char* text, int len) { return nyx_syscall3(NYX_SC(56), (nyx_u32) text, (nyx_u32) len, 0); }
 static inline int nyx_clip_get(char* buf, int cap) { return nyx_syscall3(NYX_SC(57), (nyx_u32) buf, (nyx_u32) cap, 0); }
+/* 0.1.0.18: лічильник змін вікон (показ кадру, поява, закриття, рух, розмір) - для столу: нема змін і вводу - можна
+ * не перемальовувати екран. */
+#define NYX_HAS_WIN_SEQ 1
+static inline unsigned nyx_win_seq(void) { return (unsigned) nyx_syscall3(NYX_SC(58), 0, 0, 0); }
+/* 0.1.0.19 X2: стеження за системними викликами (nyxtrace). Дитина робить nyx_trace(NYX_TRACE_ME, 0, 0) і exec;
+ * батько читає записи nyx_trace(NYX_TRACE_READ, buf, байтів) -> скільки записів; NYX_TRACE_STOP - кінець.
+ * seq іде підряд - пропуск означає втрачені записи (кільце на 256). */
+#define NYX_TRACE_STOP 0
+#define NYX_TRACE_READ 2
+#define NYX_TRACE_ME   3
+typedef struct { nyx_u32 seq; unsigned short pid, num; nyx_u32 a1, a2, a3; int ret; char str[24]; } nyx_trace_rec_t;
+static inline int nyx_trace(int op, void* buf, int cap) { return nyx_syscall3(NYX_SC(59), (nyx_u32) op, (nyx_u32) buf, (nyx_u32) cap); }
 
 /* Змінити розмір свого вікна (0.1.0.6; на подію NYX_WEV_RESIZE). Вміст після цього - чистий, перемалюй. */
 static inline int nyx_win_resize(int id, int w, int h) {
