@@ -345,8 +345,26 @@ static inline unsigned nyx_notify_get(unsigned after, char* buf, int cap) { retu
 #define NYX_HAS_LIB 1
 #define NYX_LIB_INSTALL 1
 #define NYX_LIB_REMOVE  2
+#define NYX_APP_INSTALL 3   /* 0.1.0.30: додаток .nyxapp (arg - файл; confirmed - «TAK» для непідписаного чи нового автора) */
+#define NYX_APP_REMOVE  4   /* 0.1.0.30: arg - назва додатка */
+/* 0.1.0.30: процес додатка з /apps отримує -13 (EACCES) на те, чого не просив у маніфесті (needs: net, sound, files,
+ * gamepad, fullscreen); без files бачить лише /system, /proc, /dev, /apps/<назва>/ і ~/.apps/<назва>/. */
+#define NYX_EACCES (-13)
 typedef struct { nyx_u32 op, confirmed; char arg[200]; char password[64]; } nyx_lib_req_t;
 static inline int nyx_lib(nyx_lib_req_t* req, char* out, int cap) { return nyx_syscall3(NYX_SC(62), (nyx_u32) req, (nyx_u32) out, (nyx_u32) cap); }
+/* 0.1.0.29: звук. Один потік на систему: nyx_audio_open(44100 або 48000) - 0, -19 нема звукової карти, -16 грає інша
+ * програма. Далі дописуй PCM (16 біт, стерео L,R) - nyx_audio_write не чекає й повертає, скільки байтів узято (0 - буфер
+ * ~0,6 с повний, поспи кілька мс). Не встиг - ядро грає тишу. nyx_audio_pending - скільки байтів ще не програно (0 - усе).
+ * Закривається й при виході програми. nyx_audio_volume(0..100) - гучність системи, -1 - лише дізнатись. */
+#define NYX_HAS_AUDIO 1
+static inline int nyx_audio_open(int rate) { return nyx_syscall3(NYX_SC(63), 1, (nyx_u32) rate, 0); }
+static inline int nyx_audio_write(const short* pcm, int bytes) { return nyx_syscall3(NYX_SC(63), 2, (nyx_u32) pcm, (nyx_u32) bytes); }
+static inline int nyx_audio_pending(void) { return nyx_syscall3(NYX_SC(63), 3, 0, 0); }
+static inline int nyx_audio_close(void) { return nyx_syscall3(NYX_SC(63), 4, 0, 0); }
+static inline int nyx_audio_volume(int v) { return nyx_syscall3(NYX_SC(63), 5, (nyx_u32) v, 0); }
+/* 0.1.0.31: нова тека (будь-яке ім'я, і з пробілами; батьківська має існувати) -> 0, -1 - не вдалося (нема права, уже є). */
+#define NYX_HAS_MKDIR 1
+static inline int nyx_mkdir(const char* path) { return nyx_syscall3(NYX_SC(64), (nyx_u32) path, 0, 0); }
 
 /* Змінити розмір свого вікна (0.1.0.6; на подію NYX_WEV_RESIZE). Вміст після цього - чистий, перемалюй. */
 static inline int nyx_win_resize(int id, int w, int h) {
