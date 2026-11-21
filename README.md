@@ -16,6 +16,7 @@ The kernel is closed source; this SDK is public.*
 | `lib/` | `start.s` (вхід у `main(argc, argv)`) і `user.ld` (програма — плоский бінарник з адреси 0x40000000) |
 | `tools/nyx-build.sh` | збірка + **перевірка ABI**: програма, якій бракує системного виклику ядра, не збереться |
 | `tools/make-image.py` | PNG → `.nyxi` (картинки для програм) |
+| `tools/make-nyxlib.py` | зібрати бібліотеку чи інструмент `.nyxlib` (у NyxOS: `sudo lib install файл.nyxlib`) |
 | `abi.txt` | таблиця системних викликів ядра цієї версії (`VERSION`) |
 | `template/main.c` | шаблон: квадрат рухається стрілками |
 | `examples/` | приклади: `hello` (файли), `ngtest` (графіка), `frametest` (кадр), `inputtest` (клавіатура й миша) |
