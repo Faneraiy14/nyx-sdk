@@ -318,6 +318,11 @@ typedef struct { int x, y, buttons, dx, dy; } nyx_mouse_t;
 static inline int nyx_win_create(int w, int h, const char* title) {
     return nyx_syscall3(NYX_SC(37), (nyx_u32) w, (nyx_u32) h, (nyx_u32) title);
 }
+/* Буфер обміну (0.1.0.11): текст до 16 КБ, спільний для всіх програм. get повертає довжину (не з нулем у кінці). */
+#define NYX_HAS_CLIPBOARD 1
+static inline int nyx_clip_set(const char* text, int len) { return nyx_syscall3(NYX_SC(56), (nyx_u32) text, (nyx_u32) len, 0); }
+static inline int nyx_clip_get(char* buf, int cap) { return nyx_syscall3(NYX_SC(57), (nyx_u32) buf, (nyx_u32) cap, 0); }
+
 /* Змінити розмір свого вікна (0.1.0.6; на подію NYX_WEV_RESIZE). Вміст після цього - чистий, перемалюй. */
 static inline int nyx_win_resize(int id, int w, int h) {
     return nyx_syscall3(NYX_SC(55), (nyx_u32) id, (nyx_u32) w, (nyx_u32) h);
