@@ -339,6 +339,14 @@ static inline int nyx_trace(int op, void* buf, int cap) { return nyx_syscall3(NY
 #define NYX_HAS_NOTIFY 1
 static inline int nyx_notify(const char* text) { return nyx_syscall3(NYX_SC(60), (nyx_u32) text, 0, 0); }
 static inline unsigned nyx_notify_get(unsigned after, char* buf, int cap) { return (unsigned) nyx_syscall3(NYX_SC(61), (nyx_u32) after, (nyx_u32) buf, (nyx_u32) cap); }
+/* 0.1.0.27 B3: бібліотеки .nyxlib з вікна. op: NYX_LIB_INSTALL (arg - шлях до файлу; confirmed=1 - «TAK» для
+ * непідписаного) чи NYX_LIB_REMOVE (arg - назва). password - пароль поточного адміністратора (як sudo; ядро стирає
+ * його в req). Вивід (що сталося) - у out. 0 - вдалося, -2 - не той пароль / не адміністратор, -3 - відмова (див. out). */
+#define NYX_HAS_LIB 1
+#define NYX_LIB_INSTALL 1
+#define NYX_LIB_REMOVE  2
+typedef struct { nyx_u32 op, confirmed; char arg[200]; char password[64]; } nyx_lib_req_t;
+static inline int nyx_lib(nyx_lib_req_t* req, char* out, int cap) { return nyx_syscall3(NYX_SC(62), (nyx_u32) req, (nyx_u32) out, (nyx_u32) cap); }
 
 /* Змінити розмір свого вікна (0.1.0.6; на подію NYX_WEV_RESIZE). Вміст після цього - чистий, перемалюй. */
 static inline int nyx_win_resize(int id, int w, int h) {
