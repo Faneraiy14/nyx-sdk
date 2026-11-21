@@ -298,20 +298,29 @@ typedef struct { int x, y, buttons, dx, dy; } nyx_mouse_t;
  * Програма: nyx_win_create -> малює у СВОЄМУ буфері w*h (0x00RRGGBB) -> nyx_win_present копіює в
  * вікно; nyx_win_event - події (0 - нема):
  *   NYX_WEV_KEY:   (натиснуто << 8) | код клавіші
- *   NYX_WEV_MOUSE: кнопки (NYX_WEV_BUTTONS), x/y всередині вікна (NYX_WEV_X/Y)
+ *   NYX_WEV_MOUSE: клік лівою кнопкою, x/y всередині вікна (NYX_WEV_X/Y, до 4095)
  *   NYX_WEV_CLOSE: натиснули хрестик - програма закриває вікно / завершується
+ *   NYX_WEV_RESIZE: стіл просить розмір NYX_WEV_W x NYX_WEV_H («на весь екран» / «повернути»): програма
+ *                   робить nyx_win_resize і перемальовує; не вміє - просто ігнорує
  * Вікна процесу зникають самі, коли він завершується. */
 #define NYX_WEV_TYPE(e)    (((unsigned) (e) >> 24) & 0xFF)
 #define NYX_WEV_KEY   1
 #define NYX_WEV_MOUSE 2
 #define NYX_WEV_CLOSE 3
-#define NYX_WEV_X(e)       ((e) & 0x3FF)
-#define NYX_WEV_Y(e)       (((e) >> 10) & 0x3FF)
-#define NYX_WEV_BUTTONS(e) (((e) >> 20) & 0x7)
+#define NYX_WEV_RESIZE 4
+#define NYX_WEV_X(e)       ((e) & 0xFFF)
+#define NYX_WEV_Y(e)       (((e) >> 12) & 0xFFF)
+#define NYX_WEV_BUTTONS(e) (1)               /* подія миші - завжди клік лівою */
+#define NYX_WEV_W(e)       ((e) & 0xFFF)
+#define NYX_WEV_H(e)       (((e) >> 12) & 0xFFF)
 #define NYX_WIN_TITLE_MAX 48
 
 static inline int nyx_win_create(int w, int h, const char* title) {
     return nyx_syscall3(NYX_SC(37), (nyx_u32) w, (nyx_u32) h, (nyx_u32) title);
+}
+/* Змінити розмір свого вікна (0.1.0.6; на подію NYX_WEV_RESIZE). Вміст після цього - чистий, перемалюй. */
+static inline int nyx_win_resize(int id, int w, int h) {
+    return nyx_syscall3(NYX_SC(55), (nyx_u32) id, (nyx_u32) w, (nyx_u32) h);
 }
 static inline int nyx_win_present(int id, const nyx_u32* pixels) {
     return nyx_syscall3(NYX_SC(38), (nyx_u32) id, (nyx_u32) pixels, 0);
